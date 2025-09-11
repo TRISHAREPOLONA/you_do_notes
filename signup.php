@@ -1,5 +1,9 @@
-<?php include("config.php"); ?>
 <?php
+include("config.php");
+session_start();
+
+$message = "";
+
 if (isset($_POST['signup'])) {
     $name = $_POST['name'];
     $email = $_POST['email'];
@@ -7,15 +11,29 @@ if (isset($_POST['signup'])) {
 
     $sql = "INSERT INTO users (name,email,password) VALUES ('$name','$email','$password')";
     if (mysqli_query($conn, $sql)) {
-        echo "Signup successful! <a href='login.php'>Login now</a>";
+        $message = "✅ Account created successfully!";
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $message = "❌ Error: " . mysqli_error($conn);
     }
 }
 ?>
-<form method="post">
-    Name: <input type="text" name="name"><br>
-    BU Email: <input type="email" name="email"><br>
-    Password: <input type="password" name="password"><br>
-    <button type="submit" name="signup">Sign Up</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Create Account</h2>
+    <?php if ($message != "") echo "<p style='color:green;'>$message</p>"; ?>
+    <form method="post">
+      <input type="text" name="name" placeholder="Name" required><br>
+      <input type="email" name="email" placeholder="BU Email" required><br>
+      <input type="password" name="password" placeholder="Password" required><br>
+      <button type="submit" name="signup">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="login.php">Login here</a></p>
+  </div>
+</body>
+</html>
