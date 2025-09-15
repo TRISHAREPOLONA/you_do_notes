@@ -8,8 +8,18 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-// Get products from DB
-$result = mysqli_query($conn, "SELECT * FROM products");
+// --- Notifications Setup (temporary placeholder) ---
+$notification_count = 0; // default (no notifications yet)
+
+// Search products
+$search = "";
+if (isset($_GET['search'])) {
+    $search = mysqli_real_escape_string($conn, $_GET['search']);
+    $query = "SELECT * FROM products WHERE title LIKE '%$search%' OR description LIKE '%$search%'";
+} else {
+    $query = "SELECT * FROM products";
+}
+$result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +43,7 @@ $result = mysqli_query($conn, "SELECT * FROM products");
       margin: 0 auto;
       padding: 20px 0;
     }
-    /* Top Navbar */
+    /* Navbar */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -45,28 +55,11 @@ $result = mysqli_query($conn, "SELECT * FROM products");
       top: 0;
       z-index: 100;
     }
-    .navbar-left {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-    }
     .navbar-left h2 {
       margin: 0;
       color: #5a4b41;
       font-size: 2rem;
       letter-spacing: 1px;
-    }
-    .navbar-center {
-      flex: 2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .navbar-center form {
-      width: 100%;
-      display: flex;
-      justify-content: center;
     }
     .navbar-center input {
       width: 300px;
@@ -76,18 +69,17 @@ $result = mysqli_query($conn, "SELECT * FROM products");
       font-size: 1rem;
     }
     .navbar-right {
-      flex: 1;
       display: flex;
-      justify-content: flex-end;
       align-items: center;
     }
     .navbar-right a {
-      margin-left: 20px;
+      margin-left: 35px;
       color: #5a4b41;
       text-decoration: none;
       font-weight: bold;
       font-size: 1rem;
       transition: color 0.2s;
+      position: relative;
     }
     .navbar-right a:hover {
       color: #b08968;
@@ -96,10 +88,43 @@ $result = mysqli_query($conn, "SELECT * FROM products");
       font-size: 1.4rem;
       cursor: pointer;
       transition: color 0.2s;
-      margin-left: 20px; /* spacing from other links */
     }
     .navbar-right i:hover {
       color: #b08968;
+    }
+
+    /* Notification badge */
+    .notification {
+      position: relative;
+    }
+    .notification .badge {
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      padding: 4px 7px;
+      border-radius: 50%;
+      background: red;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    /* Banner */
+    .banner {
+      background: url('assets/minimal.png') no-repeat center center/cover;
+      height: 450px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .banner h1 {
+      background: rgba(0,0,0,0.5);
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 1.8rem;
     }
 
     /* Product catalog grid */
@@ -139,62 +164,99 @@ $result = mysqli_query($conn, "SELECT * FROM products");
     .btn:hover {
       background: #a0765b;
     }
+
     /* Sections below */
     .sections {
-      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 60px 0;
+      flex-wrap: wrap;
       text-align: center;
-      width: 100%;
     }
-    .sections h2 {
-      color: #5a4b41;
-      margin-bottom: 20px;
-    }
-    .sections .section-box {
+    .section-box {
       background: #fffaf5;
-      margin: 20px auto;
       padding: 30px;
-      width: 80%;
       border-radius: 15px;
+      width: 280px;
       box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
     }
+    .section-box:hover {
+      transform: scale(1.05);
+    }
+    .section-box h2 {
+      color: #5a4b41;
+      margin-bottom: 10px;
+    }
+    .section-box p {
+      color: #6d5d52;
+      margin: 15px 0;
+    }
+    .section-box a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #b08968;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .section-box a:hover {
+      background: #a0765b;
+    }
+
     @media (max-width: 900px) {
       .navbar {
         flex-direction: column;
         align-items: stretch;
-        padding: 10px 10px;
-      }
-      .navbar-left, .navbar-center, .navbar-right {
-        justify-content: center;
-        margin: 5px 0;
+        padding: 10px;
       }
       .navbar-center input {
         width: 90vw;
         max-width: 300px;
       }
-      .navbar-right i {
-        margin-left: 10px;
+      .sections {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .section-box {
+        width: 90%;
+        margin: 0 auto;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Navigation bar -->
+  <!-- Navbar -->
   <div class="navbar">
     <div class="navbar-left">
       <h2>YOU DO NOTES</h2>
     </div>
     <div class="navbar-center">
       <form method="GET" action="products.php">
-        <input type="text" name="search" placeholder="Search products...">
+        <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search); ?>">
       </form>
     </div>
     <div class="navbar-right">
-      <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="#contact">Contact</a>
+      <!-- Notification bell FIRST -->
+      <a href="notifications.php" class="notification" title="Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <?php if ($notification_count > 0): ?>
+          <span class="badge"><?php echo $notification_count; ?></span>
+        <?php endif; ?>
+      </a>
+
+      <a href="about.php">About</a>
+      <a href="contact.php">Contact</a>
       <a href="cart.php" title="Cart"><i class="fa-solid fa-cart-shopping"></i></a>
       <a href="profile.php" title="Profile"><i class="fa-solid fa-user"></i></a>
     </div>
+  </div>
+
+  <!-- Banner -->
+  <div class="banner">
+    <h1>We believe in Minimalism. Less is More.</h1>
   </div>
 
   <div class="container">
@@ -210,19 +272,22 @@ $result = mysqli_query($conn, "SELECT * FROM products");
       <?php } ?>
     </div>
 
-    <!-- Extra Sections -->
-    <div class="sections" id="services">
+    <!-- Sections -->
+    <div class="sections">
       <div class="section-box">
         <h2>Our Services</h2>
-        <p>We provide high-quality digital notes and study materials designed for students and professionals.</p>
+        <p>High-quality study notes designed for learners.</p>
+        <a href="services.php">Learn More</a>
       </div>
-      <div class="section-box" id="codes">
+      <div class="section-box">
         <h2>Codes</h2>
-        <p>Access exclusive discount codes and promo offers for consistent users.</p>
+        <p>Get exclusive discounts and promo codes.</p>
+        <a href="codes.php">View Codes</a>
       </div>
-      <div class="section-box" id="portfolio">
+      <div class="section-box">
         <h2>Portfolio</h2>
-        <p>Check out our collection of past projects and collaborations with students and educators.</p>
+        <p>Browse our collection of past projects.</p>
+        <a href="portfolio.php">View Portfolio</a>
       </div>
     </div>
   </div>

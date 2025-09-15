@@ -2,18 +2,18 @@
 include("config.php");
 session_start();
 
-$message = "";
-
 if (isset($_POST['signup'])) {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    $sql = "INSERT INTO users (name,email,password) VALUES ('$name','$email','$password')";
+    $sql = "INSERT INTO users (name, email, password, role) VALUES ('$name','$email','$password','user')";
     if (mysqli_query($conn, $sql)) {
-        $message = "✅ Account created successfully!";
+        // Redirect to login after successful signup
+        header("Location: login.php?signup=success");
+        exit;
     } else {
-        $message = "❌ Error: " . mysqli_error($conn);
+        $error = "❌ Error: " . mysqli_error($conn);
     }
 }
 ?>
@@ -26,7 +26,7 @@ if (isset($_POST['signup'])) {
 <body>
   <div class="container">
     <h2>Create Account</h2>
-    <?php if ($message != "") echo "<p style='color:green;'>$message</p>"; ?>
+    <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
     <form method="post">
       <input type="text" name="name" placeholder="Name" required><br>
       <input type="email" name="email" placeholder="BU Email" required><br>
