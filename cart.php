@@ -60,51 +60,91 @@ body {
     margin: 50px auto;
     padding: 20px;
 }
-h2 { color: #5a4b41; text-align: center; margin-bottom: 30px; }
+h2 { 
+    color: #5a4b41; 
+    text-align: center; 
+    margin-bottom: 30px; 
+    font-size: 2rem;
+}
 .catalog {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
 }
 .product-card {
-    background: #fffaf5;
+    background: #ffffff;
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.1);
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 220px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.product-card h3 { margin: 10px 0; color: #5a4b41; }
-.product-card p { color: #6d5d52; }
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0,0,0,0.15);
+}
+.product-card h3 { 
+    margin: 10px 0; 
+    color: #333; 
+    font-size: 1.2rem;
+}
+.product-card p { 
+    color: #555; 
+    margin: 5px 0;
+}
 .btn {
     background: #b08968;
     color: #fff;
-    padding: 8px 18px;
+    padding: 10px 20px;
     border-radius: 8px;
     text-decoration: none;
-    margin-top: 10px;
+    margin-top: 12px;
     display: inline-block;
+    font-size: 0.9rem;
+    transition: background 0.2s;
 }
 .btn:hover { background: #a0765b; }
 .total {
     text-align: right;
-    margin-top: 20px;
+    margin-top: 30px;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    color: #5a4b41;
 }
 .back-btn {
     display: inline-block;
     margin-bottom: 20px;
     background: #5a4b41;
     color: #fff;
-    padding: 8px 15px;
+    padding: 10px 18px;
     border-radius: 8px;
     text-decoration: none;
+    font-size: 0.9rem;
 }
 .back-btn:hover { background: #b08968; }
+
+/* Cart badge in navbar */
+.cart-link {
+    position: relative;
+    margin-left: 20px;
+    color: #5a4b41;
+    text-decoration: none;
+}
+.cart-link .cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background: #d66a5e;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 4px 7px;
+    border-radius: 50%;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+}
 </style>
 </head>
 <body>
