@@ -1,5 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+.highlight {
+  border: 3px solid #c8a97e;
+  border-radius: 12px;
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+
 * {
   margin: 0;
   padding: 0;
@@ -250,6 +266,25 @@ input:focus {
   color: #8c7a6b;
   margin-bottom: 10px;
 }
+.note-preview {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.locked-message {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
 
     /* Notification badge */
     .notification {
@@ -385,4 +420,22 @@ input:focus {
         margin: 0 auto;
       }
     }
+.stats {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+}
 
+/* Mobile: stack vertically */
+@media (max-width: 600px) {
+  .stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stats div {
+    width: 100%;
+    padding: 15px;
+    font-size: 14px;
+  }
+}

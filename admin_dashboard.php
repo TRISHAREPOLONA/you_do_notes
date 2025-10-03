@@ -8,6 +8,8 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Admin Dashboard - YOU DO NOTES</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f7f3ef; padding: 20px; }

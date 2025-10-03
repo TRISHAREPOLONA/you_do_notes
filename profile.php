@@ -1,14 +1,18 @@
 <?php
 include("config.php");
 session_start();
-
+// Redirect if not logged in
+if (!isset($_SESSION['user'])) {
+  header("Location: login.php");
+  exit;
+}
 // Check if user is logged in
 if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
     echo "<p>You are not logged in. Please <a href='login.php'>login</a> first.</p>";
     exit;
 }
 
-$userEmail = $_SESSION['user'];
+$userEmail = $_SESSION['user']['email'];
 
 // Fetch user info
 $query = mysqli_query($conn, "SELECT * FROM users WHERE email='$userEmail' LIMIT 1");
@@ -44,6 +48,8 @@ if (isset($_POST['update'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <meta charset="UTF-8">
 <title>My Profile - YOU DO NOTES</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

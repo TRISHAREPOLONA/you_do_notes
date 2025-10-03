@@ -8,7 +8,8 @@ if (!isset($_SESSION['user'])) {
    exit;
 }
 
-$user_email = $_SESSION['user'];
+// Correct way: access the email field from the session array
+$user_email = $_SESSION['user']['email'];
 
 // Fetch notifications for this user
 $query = "SELECT * FROM notifications WHERE user_email='$user_email' ORDER BY created_at DESC";
@@ -22,6 +23,8 @@ mysqli_query($conn, "UPDATE notifications SET is_read=1 WHERE user_email='$user_
 <html lang="en">
 
 <head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
    <meta charset="UTF-8">
    <title>Notifications - YOU DO NOTES</title>
    <link rel="stylesheet" href="assets/style.css">
