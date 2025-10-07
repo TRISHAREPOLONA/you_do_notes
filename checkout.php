@@ -30,49 +30,6 @@ if (!empty($cartIds)) {
     }
 }
 
-// Initialize discount variables
-$discount_code = '';
-$discount_amount = 0;
-$final_total = $total;
-$discount_success = '';
-$discount_error = '';
-
-// Apply discount if submitted
-if (isset($_POST['apply_discount'])) {
-    $discount_code = mysqli_real_escape_string($conn, $_POST['discount_code']);
-    $discount_query = "SELECT * FROM discounts WHERE code = '$discount_code' 
-                      AND (expires_at IS NULL OR expires_at >= CURDATE()) 
-                      AND used_count < usage_limit";
-    $discount_result = mysqli_query($conn, $discount_query);
-    
-    if ($discount = mysqli_fetch_assoc($discount_result)) {
-        if ($total >= $discount['min_purchase']) {
-            if ($discount['discount_type'] == 'percentage') {
-                $discount_amount = $total * ($discount['discount_value'] / 100);
-            } else {
-                $discount_amount = $discount['discount_value'];
-            }
-            $final_total = $total - $discount_amount;
-            $discount_success = "Discount applied successfully! You saved ₱" . number_format($discount_amount, 2);
-            
-            // Store discount in session for later use
-            $_SESSION['applied_discount'] = $discount;
-        } else {
-            $discount_error = "Minimum purchase of ₱" . number_format($discount['min_purchase'], 2) . " required for this discount.";
-        }
-    } else {
-        $discount_error = "Invalid or expired discount code.";
-    }
-}
-
-// Remove discount if requested
-if (isset($_POST['remove_discount'])) {
-    $discount_code = '';
-    $discount_amount = 0;
-    $final_total = $total;
-    unset($_SESSION['applied_discount']);
-}
-
 // Helper: get numeric user id from session (handles email/string or saved array)
 function getLoggedInUserId($conn)
 {
@@ -163,55 +120,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 
         $insert = "
             INSERT INTO orders 
-            (user_id, product_id, status, created_at, quantity, total_amount, payment_method, payment_status, gcash_number, seller_id, platform_commission, seller_earnings, order_ref, discount_amount, final_amount)
+            (user_id, product_id, status, created_at, quantity, total_amount, payment_method, payment_status, gcash_number, seller_id, platform_commission, seller_earnings, order_ref)
             VALUES
-            ($userId, $productId, '" . mysqli_real_escape_string($conn, $status) . "', NOW(), $quantity, $totalAmount, '$paymentMethodSafe', '$paymentStatus', $gcash_sql, $seller_sql, $platformCommission, $sellerEarnings, '" . mysqli_real_escape_string($conn, $orderRef) . "', $discount_amount, $final_total)
+            ($userId, $productId, '" . mysqli_real_escape_string($conn, $status) . "', NOW(), $quantity, $totalAmount, '$paymentMethodSafe', '$paymentStatus', $gcash_sql, $seller_sql, $platformCommission, $sellerEarnings, '" . mysqli_real_escape_string($conn, $orderRef) . "')
         ";
         $ok = mysqli_query($conn, $insert);
         if (!$ok) {
             echo "Database error: " . mysqli_error($conn);
             exit;
         }
-        
-        // Update discount usage count if discount was applied
-        if (isset($_SESSION['applied_discount'])) {
-            $discount_id = $_SESSION['applied_discount']['id'];
-            mysqli_query($conn, "UPDATE discounts SET used_count = used_count + 1 WHERE id = $discount_id");
-            mysqli_query($conn, "INSERT INTO user_discounts (user_id, discount_id) VALUES ($userId, $discount_id)");
-        }
-        
         if (!$firstOrderId) $firstOrderId = mysqli_insert_id($conn);
     }
-
-    // Add loyalty points (10% of final total)
-    $loyaltyPointsEarned = floor($final_total * 0.10);
-    mysqli_query($conn, "UPDATE users SET loyalty_points = loyalty_points + $loyaltyPointsEarned, total_spent = total_spent + $final_total WHERE id = $userId");
-
-    // Update member tier based on total spent
-    $user_update = mysqli_query($conn, "SELECT total_spent FROM users WHERE id = $userId");
-    $user_data = mysqli_fetch_assoc($user_update);
-    $total_spent = $user_data['total_spent'] + $final_total;
-    
-    $tier = 'Bronze';
-    if ($total_spent >= 5000) $tier = 'Platinum';
-    elseif ($total_spent >= 2000) $tier = 'Gold';
-    elseif ($total_spent >= 500) $tier = 'Silver';
-    
-    mysqli_query($conn, "UPDATE users SET member_tier = '$tier' WHERE id = $userId");
 
     // save receipt data in session (useful if you want)
     $_SESSION['receipt'] = [
         'order_ref' => $orderRef,
         'payment' => $paymentMethod,
         'account_number' => $accountNumber,
-        'total' => $total,
-        'discount_amount' => $discount_amount,
-        'final_total' => $final_total
+        'total' => $total
     ];
 
-    // clear cart and discount
+    // clear cart
     $_SESSION['cart'] = [];
-    unset($_SESSION['applied_discount']);
 
     // redirect to receipt using order_ref
     header("Location: receipt.php?order_ref=" . urlencode($orderRef));
@@ -227,63 +157,281 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     <meta charset="UTF-8">
     <title>Checkout - YOU DO NOTES</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <style>
-        /* Your existing styles remain the same, just adding discount styles */
-        
-        .discount-section {
-            background: #f8f9fa;
+        .checkout-page {
+            background: linear-gradient(135deg, #f7f3ef 0%, #f0e6d6 100%);
+            min-height: 100vh;
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
         }
-        
-        .discount-form {
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin: 30px 0;
+            align-items: start;
+        }
+
+        .order-items {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .order-summary {
+            background: linear-gradient(135deg, #b08968 0%, #a0765b 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 30px;
+        }
+
+        .order-item {
             display: flex;
-            gap: 10px;
-            align-items: end;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
         }
-        
-        .discount-input-group {
+
+        .order-item:hover {
+            background: #fafafa;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f0e6d6 0%, #e8d9c5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            color: #b08968;
+        }
+
+        .item-info {
             flex: 1;
         }
-        
-        .discount-success {
-            background: #d4edda;
-            color: #155724;
+
+        .item-info h4 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .item-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+
+        .item-price {
+            color: #b08968;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-left: 15px;
+        }
+
+        .payment-section {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .payment-option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            border-color: #b08968;
+            transform: translateY(-2px);
+        }
+
+        .payment-option.selected {
+            border-color: #b08968;
+            background: #fffaf5;
+        }
+
+        .payment-option i {
+            font-size: 2rem;
+            color: #b08968;
+            margin-bottom: 10px;
+        }
+
+        .payment-option span {
+            display: block;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #b08968;
+            box-shadow: 0 0 0 3px rgba(176, 137, 104, 0.1);
+        }
+
+        .input-hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .summary-items {
+            margin-bottom: 25px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .summary-total {
+            font-size: 1.4rem;
+            font-weight: 700;
+            border-top: 2px solid rgba(255,255,255,0.3);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: white;
+            color: #b08968;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .checkout-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #d63031;
             padding: 12px;
             border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #c3e6cb;
+            margin-bottom: 15px;
+            border: 1px solid #ffcccc;
+            font-size: 0.9rem;
         }
-        
-        .applied-discount {
-            background: #fff3cd;
-            color: #856404;
+
+        .security-notice {
+            background: #e8f4fd;
+            color: #0c5460;
             padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #b8daff;
+            font-size: 0.9rem;
             display: flex;
-            justify-content: between;
             align-items: center;
+            gap: 10px;
         }
-        
-        .remove-discount-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
+
+        .checkout-navigation {
+            margin-bottom: 30px;
         }
-        
-        .discount-breakdown {
-            background: #e7f3ff;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin: 10px 0;
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .checkout-header h2 {
+            color: #5a4b41;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .checkout-header p {
+            color: #8d7b68;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -319,48 +467,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                     <?php } ?>
                 </div>
 
-                <!-- Discount Section -->
-                <div class="discount-section">
-                    <h3><i class="fas fa-tag"></i> Apply Discount Code</h3>
-                    
-                    <?php if ($discount_amount > 0): ?>
-                        <div class="applied-discount">
-                            <div>
-                                <strong>Discount Applied!</strong>
-                                <p>Code: <?php echo $discount_code; ?> - Saved ₱<?php echo number_format($discount_amount, 2); ?></p>
-                            </div>
-                            <form method="POST" style="display: inline;">
-                                <button type="submit" name="remove_discount" class="remove-discount-btn">
-                                    <i class="fas fa-times"></i> Remove
-                                </button>
-                            </form>
-                        </div>
-                    <?php else: ?>
-                        <form method="POST" class="discount-form">
-                            <div class="discount-input-group">
-                                <label class="form-label">Enter Discount Code</label>
-                                <input type="text" name="discount_code" value="<?php echo $discount_code; ?>" class="form-input" placeholder="e.g., STUDENT10">
-                            </div>
-                            <button type="submit" name="apply_discount" class="btn" style="width: auto; padding: 15px 20px;">
-                                Apply Code
-                            </button>
-                        </form>
-                    <?php endif; ?>
-                    
-                    <?php if ($discount_success): ?>
-                        <div class="discount-success">
-                            <i class="fas fa-check-circle"></i> <?php echo $discount_success; ?>
-                        </div>
-                    <?php elseif ($discount_error): ?>
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i> <?php echo $discount_error; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
                 <div class="payment-section">
                     <h3 class="section-title"><i class="fas fa-lock"></i> Payment Details</h3>
-
+                    
                     <form method="POST" onsubmit="return validateCheckoutForm()">
                         <div class="form-group">
                             <label class="form-label">Payment Method</label>
@@ -405,7 +514,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                         </div>
 
                         <button type="submit" name="checkout" class="checkout-btn">
-                            <i class="fas fa-lock"></i> Complete Purchase - ₱<?php echo number_format($final_total, 2); ?>
+                            <i class="fas fa-lock"></i> Complete Purchase - ₱<?php echo number_format($total, 2); ?>
                         </button>
                     </form>
                 </div>
@@ -422,14 +531,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                         <span>Subtotal:</span>
                         <span>₱<?php echo number_format($total, 2); ?></span>
                     </div>
-                    
-                    <?php if ($discount_amount > 0): ?>
-                    <div class="summary-row" style="color: #27ae60;">
-                        <span>Discount:</span>
-                        <span>-₱<?php echo number_format($discount_amount, 2); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    
                     <div class="summary-row">
                         <span>Platform Fee:</span>
                         <span>Free</span>
@@ -437,22 +538,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                 </div>
                 <div class="summary-row summary-total">
                     <span>Total Amount:</span>
-                    <span>₱<?php echo number_format($final_total, 2); ?></span>
+                    <span>₱<?php echo number_format($total, 2); ?></span>
                 </div>
                 
-                <?php if ($discount_amount > 0): ?>
-                <div class="discount-breakdown">
-                    <small><i class="fas fa-piggy-bank"></i> You saved ₱<?php echo number_format($discount_amount, 2); ?> with discount code!</small>
-                </div>
-                <?php endif; ?>
-                
-                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px; text-align: center;">
-                    <i class="fas fa-download" style="margin-bottom: 10px; display: block; font-size: 1.5rem;"></i>
-                    <small>Instant digital access after payment</small>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         function selectPayment(method) {
@@ -460,20 +548,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             document.querySelectorAll('.payment-option').forEach(option => {
                 option.classList.remove('selected');
             });
-
+            
             // Add selected class to clicked option
             event.currentTarget.classList.add('selected');
-
+            
             // Set the radio button value
             document.querySelector(`input[value="${method}"]`).checked = true;
-
+            
             // Hide payment error
             document.getElementById('payment-error').style.display = 'none';
         }
 
         function validateCheckoutForm() {
             let isValid = true;
-
+            
             // Validate payment method
             const paymentSelected = document.querySelector('input[name="payment"]:checked');
             const paymentError = document.getElementById('payment-error');
@@ -483,7 +571,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             } else {
                 paymentError.style.display = 'none';
             }
-
+            
             // Validate PIN
             const pin = document.getElementById('pin').value;
             const pinError = document.getElementById('pin-error');
@@ -494,7 +582,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             } else {
                 pinError.style.display = 'none';
             }
-
+            
             // Validate account number
             const accountNumber = document.getElementById('account_number').value;
             const accountError = document.getElementById('account-error');
@@ -505,18 +593,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             } else {
                 accountError.style.display = 'none';
             }
-
+            
             if (!isValid) {
                 const firstError = document.querySelector('.error-message[style="display: block;"]');
                 if (firstError) {
-                    firstError.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 return false;
             }
-
+            
             return true;
         }
 
@@ -533,7 +618,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                     document.getElementById('pin-error').style.display = 'none';
                 }
             });
-
+            
             // Account number validation
             document.getElementById('account_number').addEventListener('input', function(e) {
                 this.value = this.value.replace(/[^0-9]/g, '');
