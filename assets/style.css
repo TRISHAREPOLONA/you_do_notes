@@ -357,6 +357,7 @@ input:focus {
     .btn:hover {
       background: #a0765b;
     }
+    
   html {
   scroll-behavior: smooth;
 }

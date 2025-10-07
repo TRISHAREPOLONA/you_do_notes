@@ -15,14 +15,15 @@ if (!$result || mysqli_num_rows($result) === 0) {
 }
 
 $product = mysqli_fetch_assoc($result);
+
+// ✅ Fetch related/suggested products (limit 3)
+$suggestions = mysqli_query($conn, "SELECT * FROM products WHERE id != $id ORDER BY RAND() LIMIT 3");
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
    <meta charset="UTF-8">
    <title><?php echo htmlspecialchars($product['title']); ?> - Product Details</title>
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -49,6 +50,7 @@ $product = mysqli_fetch_assoc($result);
          flex: 1;
       }
 
+      .product-image iframe, 
       .product-image img {
          width: 100%;
          max-height: 400px;
@@ -95,10 +97,74 @@ $product = mysqli_fetch_assoc($result);
       .btn:hover {
          background: #b08968;
       }
+
+      /* Suggestions Section */
+      .suggestions {
+         max-width: 900px;
+         margin: 40px auto;
+         background: #fffaf5;
+         padding: 25px;
+         border-radius: 15px;
+         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .suggestions h3 {
+         margin-bottom: 20px;
+         color: #5a4b41;
+         text-align: center;
+      }
+
+      .suggestion-list {
+         display: grid;
+         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+         gap: 20px;
+      }
+
+      .suggestion-card {
+         background: #fff;
+         padding: 15px;
+         border-radius: 10px;
+         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+         transition: transform 0.2s;
+         text-align: center;
+      }
+
+      .suggestion-card:hover {
+         transform: translateY(-5px);
+      }
+
+      .suggestion-card h4 {
+         color: #444;
+         font-size: 1.1rem;
+         margin: 10px 0;
+      }
+
+      .suggestion-card p {
+         color: #777;
+         font-size: 0.9rem;
+      }
+
+      .back-btn {
+         display: block;
+         width: fit-content;
+         margin: 40px auto;
+         text-align: center;
+         background: #5a4b41;
+         color: #fff;
+         padding: 12px 20px;
+         border-radius: 8px;
+         text-decoration: none;
+         font-weight: bold;
+         transition: background 0.3s;
+      }
+
+      .back-btn:hover {
+         background: #b08968;
+      }
    </style>
 </head>
-
 <body>
+
    <div class="container">
       <div class="product-image">
          <?php if (!empty($product['file_path'])): ?>
@@ -109,16 +175,15 @@ $product = mysqli_fetch_assoc($result);
                🔒 Preview Blurred – Purchase to Unlock
             </div>
          <?php else: ?>
-            <img src="images/<?php echo htmlspecialchars($product['image']); ?>"
-               alt="<?php echo htmlspecialchars($product['title']); ?>"
-               style="filter: blur(5px);">
+            <div style="width:100%; height:400px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+               <i class="fa-solid fa-file" style="font-size: 50px; color: #666; filter: blur(3px);"></i>
+            </div>
             <div style="text-align:center; margin-top:5px; color:#a33; font-size:14px;">
                🔒 Preview Blurred – Purchase to Unlock
             </div>
          <?php endif; ?>
       </div>
-
-
+      
       <div class="product-details">
          <h2><?php echo htmlspecialchars($product['title']); ?></h2>
          <p><?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
@@ -129,6 +194,22 @@ $product = mysqli_fetch_assoc($result);
          </a>
       </div>
    </div>
-</body>
 
+   <!-- You may also like -->
+   <div class="suggestions">
+      <h3>You May Also Like</h3>
+      <div class="suggestion-list">
+         <?php while ($row = mysqli_fetch_assoc($suggestions)): ?>
+            <div class="suggestion-card">
+               <h4><?php echo htmlspecialchars($row['title']); ?></h4>
+               <p>₱<?php echo number_format($row['price'], 2); ?></p>
+               <a href="product_details.php?id=<?php echo $row['id']; ?>" class="btn">View</a>
+            </div>
+         <?php endwhile; ?>
+      </div>
+   </div>
+
+   <a href="products.php" class="back-btn"><i class="fa fa-arrow-left"></i> Back to Homepage</a>
+
+</body>
 </html>
