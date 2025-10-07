@@ -577,7 +577,22 @@ $notes_count = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM products WHERE
             if ($result && mysqli_num_rows($result) > 0) {
                while ($row = mysqli_fetch_assoc($result)) { ?>
                   <div class="note-card">
-                     <img src="images/<?php echo $row['image']; ?>" alt="<?php echo $row['title']; ?>" class="note-image">
+                     <?php if (!empty($row['file_path'])): ?>
+   <iframe src="<?php echo htmlspecialchars($row['file_path']); ?>#toolbar=0"
+      style="width:100%; height:200px; filter: blur(4px); pointer-events:none; border-radius:12px;">
+   </iframe>
+   <div style="text-align:center; margin-top:5px; color:#a33; font-size:13px;">
+      🔒 Preview Blurred – Buyers Only
+   </div>
+<?php else: ?>
+   <div style="width:100%; height:200px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+      <i class="fa-solid fa-file" style="font-size:40px; color:#666; filter: blur(2px);"></i>
+   </div>
+   <div style="text-align:center; margin-top:5px; color:#a33; font-size:13px;">
+      🔒 Preview Blurred – Buyers Only
+   </div>
+<?php endif; ?>
+
                      <div class="note-content">
                         <div class="note-title"><?php echo htmlspecialchars($row['title']); ?></div>
                         <div class="note-price">₱<?php echo number_format($row['price'], 2); ?></div>
