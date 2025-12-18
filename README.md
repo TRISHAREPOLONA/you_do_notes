@@ -89,11 +89,38 @@ Include screenshots or a short demo video showing:
 
 ---
 
+##📌 Final Submission –
+
+##Admin Side
+
+##👤 Objective
+Allow admins to manage users and products, providing full control over content and the platform.
+
+##🗂️ Admin Features
+
+###🏢 Admin Dashboard
+
+Overview of users, products, and sales report.
+
+###👥 Manage Users
+
+View who are sellers or buyers and delete users if necessary.
+
+###📦 Manage Products
+
+Approve, reject, or remove any notes uploaded by sellers.
+
+###📊 Sales Report
+
+View overall sales, platform earnings, and number of transactions.
+
+---
 ## 🗂️ Deliverables Checklist
 ✅ Working Customer-Side Website  
 ✅ GitHub Repository Link (contains all code)  
 ✅ Screenshots or Demo Video  
 ✅ README / Documentation  
+✅ Working Admin-Side Website
 
 
 ---
