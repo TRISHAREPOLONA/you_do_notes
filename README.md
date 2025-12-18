@@ -89,9 +89,9 @@ Include screenshots or a short demo video showing:
 
 ---
 
-##📌 Final Submission –
+##  📌 Final Submission –
 
-##Admin Side
+##  Admin Side
 
 ## 👤 Objective
 Allow admins to manage users and products, providing full control over content and the platform.
