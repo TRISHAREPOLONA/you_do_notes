@@ -1,6 +1,9 @@
 <?php
-include("config.php");
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
+include("config.php");
 
 if (isset($_POST['login'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -23,9 +26,9 @@ if (isset($_POST['login'])) {
 
             // Redirect based on admin status
             if ($user['role'] == 'admin') {
-                header("Location: admin_dashboard.php");
+                header("Location: admin/admin_dashboard.php");
             } else {
-                header("Location: products.php");
+                header("Location: users/products.php");
             }
             exit;
         } else {
