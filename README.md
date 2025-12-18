@@ -93,24 +93,24 @@ Include screenshots or a short demo video showing:
 
 ##Admin Side
 
-##👤 Objective
+## 👤 Objective
 Allow admins to manage users and products, providing full control over content and the platform.
 
-##🗂️ Admin Features
+## 🗂️ Admin Features
 
-###🏢 Admin Dashboard
+### 🏢 Admin Dashboard
 
 Overview of users, products, and sales report.
 
-###👥 Manage Users
+### 👥 Manage Users
 
 View who are sellers or buyers and delete users if necessary.
 
-###📦 Manage Products
+### 📦 Manage Products
 
 Approve, reject, or remove any notes uploaded by sellers.
 
-###📊 Sales Report
+### 📊 Sales Report
 
 View overall sales, platform earnings, and number of transactions.
 
