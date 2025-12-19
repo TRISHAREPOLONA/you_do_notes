@@ -44,9 +44,7 @@
 - *Order Management* – Process orders
 - *Customer Management* – View/edit accounts
 - *Reports* – Sales analytics & exports
-- *Content Management* – Banners, pages
-- *Settings* – Store configuration
-
+  
 ---
 
 ## 🧩 Technologies Used
