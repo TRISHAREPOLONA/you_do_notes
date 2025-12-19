@@ -1,130 +1,90 @@
-# 🛍️ YOU DO NOTES – E-Commerce Website (Customer Side)
+# 🛍️ YOU DO NOTES – Complete E-Commerce Platform
 
-## 📌 Midterm Submission
-
-### 👥 Project Team
-**Project Name:** YOU DO NOTES  
-**Focus:** Customer-Side Functionality (Midterm)  
-**Repository:** [👉 View Source Code on GitHub](https://github.com/your-username/you-do-notes)
+## 📌 Final Project Submission
+*Complete E-commerce Platform with Customer & Admin Systems*
 
 ---
 
-## 🧠 Objective
-Develop the **Customer Side** of an E-Commerce website that allows customers to browse notes, view details, add to cart, and simulate checkout and payment.
+## 🚀 Quick Start
+
+### Installation (XAMPP):
+1. Place project in htdocs/you-do-notes/
+2. Import database/you-do-notes.sql
+3. Update includes/config.php
+4. Access:
+   - *Customer:* http://localhost/you-do-notes/
+   - *Admin:* http://localhost/you-do-notes/admin/
+
+### Default Logins:
+- *Customer Test:* test@bicol-u.edu.ph / Test@123 (PIN: 1234)
+- *Admin:* admin@you-do-notes.com / Admin@2024
 
 ---
 
-## 🚀 How to Run the Project
+## 🏪 CUSTOMER FEATURES
 
-### 🖥️ Local Setup (XAMPP)
-1. Clone or download the project folder from the GitHub link above.  
-2. Place it inside your `htdocs` folder in **XAMPP**.  
-3. Import the included SQL file into **phpMyAdmin** to create the database.  
-4. Update your database credentials in `config.php`.  
-5. Start **Apache** and **MySQL** in XAMPP.  
-6. Run the project in your browser:
+### ✅ Core Features:
+- *Home Page* – Featured products & banners
+- *Product Catalog* – Search, filter, sort
+- *Product Details* – Complete info with add-to-cart
+- *Shopping Cart* – Real-time updates
+- *Checkout* – Multi-step (Shipping → Payment → Confirm)
+- *User Accounts* – BU-email registration, secure login with PIN
+- *My Orders* – Order history & tracking
+- *Mobile Optimized* – Fully responsive
+
+### 💳 Payment Methods:
+- GCash (simulated)
+- Cash on Delivery (COD)
+
+---
+
+## ⚙️ ADMIN FEATURES
+
+### ✅ Management Panels:
+- *Dashboard* – Sales analytics & statistics
+- *Product Management* – Add/edit/delete products
+- *Order Management* – Process orders
+- *Customer Management* – View/edit accounts
+- *Reports* – Sales analytics & exports
+- *Content Management* – Banners, pages
+- *Settings* – Store configuration
 
 ---
 
 ## 🧩 Technologies Used
 | Layer | Technologies |
 |-------|---------------|
-| **Frontend** | HTML, CSS, JavaScript |
-| **Backend** | PHP |
-| **Database** | MySQL |
-| **Icons & Fonts** | Font Awesome, Google Fonts (Inter) |
-| **Server** | XAMPP (Apache + MySQL) |
+| *Frontend* | HTML, CSS, JavaScript, Bootstrap 5 |
+| *Backend* | PHP |
+| *Database* | MySQL |
+| *Icons & Fonts* | Font Awesome, Google Fonts (Inter) |
+| *Server* | XAMPP (Apache + MySQL) |
 
 ---
 
-## 🌟 Key Features Implemented
-
-### 🏠 Home Page
-- Displays banner/promotions and featured products.
-
-### 🛍️ Products Page
-- Dynamically loads all available products from the database.  
-- Includes sorting and category filters (optional).  
-- Each product links to its detailed view.
-
-### 📄 Product Detail Page
-- Shows full product info: name, price, description, and image.  
-- “Add to Cart” functionality working.
-
-### 🛒 Shopping Cart
-- Displays cart items, allows quantity updates and item removal.  
-- Real-time total cost updates.
-
-### 💳 Checkout Page
-- Collects shipping details, contact info, and payment option.  
-- Simulates **GCash** or **Cash on Delivery (COD)** payment.  
-- Displays order summary and confirmation after checkout.
-
-### 👤 Login / Registration
-- BU-email restricted registration (`@bicol-u.edu.ph`).  
-- Passwords hashed using PHP `password_hash()`.  
-- PIN added for extra security.  
-- Show/hide eye toggle visible on **both desktop and mobile**.  
-- Secure session-based login and logout.
-
-### 📦 My Orders
-- Displays customer order history with order reference and total amount.
-
-### 📱 Mobile Optimization
-- Fully responsive design tested on multiple screen sizes.  
-- Visible password/PIN toggle on mobile devices.
+## 📱 Mobile Responsive
+- Works on all devices
+- Touch-friendly interfaces
+- Mobile-optimized checkout
+- Responsive admin panel
 
 ---
 
-## 🖼️ Demo Screenshots / Video
-Include screenshots or a short demo video showing:
-1. Home Page  
-2. Products Page  
-3. Product Detail Page  
-4. Cart Page  
-5. Checkout Page  
-6. Login / Signup Pages  
-7. My Orders Page  
-8. Mobile View  
+## 🎯 Project Status
+*✅ COMPLETE* – Both customer and admin sides fully implemented
 
 ---
 
-##  📌 Final Submission –
+## 👥 Project Team
 
-##  Admin Side
+| Role | Members |
+|------|---------|
+| *Project Leader* | Kristine Villanueva |
+| *Front-End Developers* | Jemiel Honradez, Rose Angela Canon |
+| *Back-End Developers* | Magdaline Infante, Christine Jade Ondis |
+| *Database Architect* | Trisha Mae Repolona |
+| *QA Tester* | Christine Joy Bande |
 
-## 👤 Objective
-Allow admins to manage users and products, providing full control over content and the platform.
-
-## 🗂️ Admin Features
-
-### 🏢 Admin Dashboard
-
-Overview of users, products, and sales report.
-
-### 👥 Manage Users
-
-View who are sellers or buyers and delete users if necessary.
-
-### 📦 Manage Products
-
-Approve, reject, or remove any notes uploaded by sellers.
-
-### 📊 Sales Report
-
-View overall sales, platform earnings, and number of transactions.
-
----
-## 🗂️ Deliverables Checklist
-✅ Working Customer-Side Website  
-✅ GitHub Repository Link (contains all code)  
-✅ Screenshots or Demo Video  
-✅ README / Documentation  
-✅ Working Admin-Side Website
-
-
----
-
-**Developed by:**  
-✨ *Team YOU DO NOTES*  
-*(Bicol University – Information System Project)*  
+*Team YOU DO NOTES*  
+Bicol University – Information Systems 2024
