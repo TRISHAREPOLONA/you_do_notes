@@ -13,7 +13,7 @@
 3. Update includes/config.php
 
 ### Default Logins:
-- *Customer Test:* rose@bicol-u.edu.ph / 12345678 (PIN: 1111)
+- *Guide Customer login:* rose@bicol-u.edu.ph / 12345678 (PIN: 1111)
 - *Admin:* admin@bicol-u.edu.ph / adminrole
 
 ---
