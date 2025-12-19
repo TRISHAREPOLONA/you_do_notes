@@ -11,12 +11,9 @@
 1. Place project in htdocs/you_do_notes/
 2. Import database/you_do_notes.sql
 3. Update includes/config.php
-4. Access:
-   - *Customer:* http://localhost/you_do_notes/
-   - *Admin:* http://localhost/you_do_notes/admin/
 
 ### Default Logins:
-- *Customer Test:* test@bicol-u.edu.ph / Test@123 (PIN: 1234)
+- *Customer Test:* rose@bicol-u.edu.ph / 12345678 (PIN: 1111)
 - *Admin:* admin@bicol-u.edu.ph / adminrole
 
 ---
