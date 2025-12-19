@@ -8,16 +8,16 @@
 ## 🚀 Quick Start
 
 ### Installation (XAMPP):
-1. Place project in htdocs/you-do-notes/
-2. Import database/you-do-notes.sql
+1. Place project in htdocs/you_do_notes/
+2. Import database/you_do_notes.sql
 3. Update includes/config.php
 4. Access:
-   - *Customer:* http://localhost/you-do-notes/
-   - *Admin:* http://localhost/you-do-notes/admin/
+   - *Customer:* http://localhost/you_do_notes/
+   - *Admin:* http://localhost/you_do_notes/admin/
 
 ### Default Logins:
 - *Customer Test:* test@bicol-u.edu.ph / Test@123 (PIN: 1234)
-- *Admin:* admin@you-do-notes.com / Admin@2024
+- *Admin:* admin@bicol-u.edu.ph / adminrole
 
 ---
 
